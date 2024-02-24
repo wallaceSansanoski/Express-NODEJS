@@ -7,6 +7,15 @@ const writeFileAsync = promisify(writeFile)
 const PORT = '3003'
 const app = express()
 
+const people = [
+
+    {id: 1,name : 'wallace', middleName : 'mendes'},
+    {id: 2,name : 'louanne', middleName : 'souza'},
+    {id: 3,name : 'samir', middleName : 'sansnaoski'}
+
+]
+
+
 app.use(express.urlencoded({ extended : true }))
 app.use(express.json())
 
@@ -66,25 +75,23 @@ app.post('/include/:category', async (request, response) => {
 })
 
 app.delete('/remove/:category/:id', async (request, response) => {
+
     const data = await readFile('../banco/db.json', 'utf-8')
-    const {category, id} = request.params
+    const { category, id } = request.params
 
-   const listByCategory =  JSON.parse(data).find(item => {
-
-        if(!item[category]) return response.send(`Not found category ${category} to delete.`)
-
-        if(item[category]){
-           return  item[category]
-        }
+    const listByCategory = JSON.parse(data).find(item => {
+      if(item[category]){
+        return item[category]
+      }
     })
 
     const filteredByID = listByCategory[category].filter(item => parseInt(item.id) !== parseInt(id))
 
     const newList = JSON.parse(data).map(item => {
-        if(item[category]){
-           return  item[category] = {
-            [category] : [...filteredByID]
-           }
+        if (item[category]) {
+            return item[category] = {
+                [category]: [...filteredByID]
+            }
         }
         return item
     })
@@ -108,7 +115,6 @@ app.put('/update/:category/:name', async (request, response) => {
     })
 
     const index = newList.findIndex(item => item.nome === name)
-    console.log(index)
 
     if(index < 0 ) return response.status(404).send('BAD REQUEST. TRY UPDATE AGAIN.')
     
@@ -132,6 +138,52 @@ app.put('/update/:category/:name', async (request, response) => {
 
    response.status(200).send(newFileUpdate)
 })
+
+// app.get('/users', (request, response) => {
+//     response.status(200).send(people)
+// })
+
+// /// verb patch only change part of content, different put change everything 
+// app.patch('/user/update/:id', (request, response) => {
+
+//     const { body , params : {id} } = request
+
+//     const parseID = parseInt(id)
+//     if(isNaN(parseID)) return response.status(400).send('Bad request.')
+//     const indexUser = people.findIndex(({id}) => id === parseID)
+//     people[indexUser] = { ...people[indexUser], ...body }
+//     response.status(200).send(people)
+
+// })
+
+// app.put('/user/update/:name', (request, response) => {
+//     const {body, params : {name}}  = request
+
+//     const indexUser = people.findIndex(user => user.name === name)
+//     console.log(indexUser)
+//     if(indexUser < 0 ) return response.status(404).send('Bad request, Try again.')
+
+//     people[indexUser] =  {
+//         id : people[indexUser].id,
+//         ...body
+//     }
+
+//     response.status(200).send(people)
+// })
+
+// app.delete('/user/delete/:id', (request, response) => {
+//     const {  params : { id} } = request
+//     const parsedID = parseInt(id)
+//     if(isNaN(parsedID)) return response.status(404).send('Bad request***')
+
+//     const indexUserDelete = people.findIndex(user => user.id === id)
+
+//     if(indexUserDelete <0 ) return response.status(400).send('Bad request**')
+
+//     people.splice(indexUserDelete, 1)
+
+//     response.status(200).send(people)
+// })
 
 app.listen(PORT, () => {
     console.log('Running at port 3003')
