@@ -1,6 +1,6 @@
 const products  = require('../../banco/pordutos')
 const express  = require('express')
-const { query, validationResult } = require('express-validator')
+// const { query, validationResult } = require('express-validator') about sanitazition the code
 
 const routerProduct = express.Router()
 
@@ -25,6 +25,13 @@ const middlewareFake = (request, response, next) => {
 //     })
 
 routerProduct.get('/products', (request, response) => {
+    response.cookie('name',  'wallace',  { maxAge : 10000})
+    // if(request.cookies.name && request.cookies.name === 'wallace'){ 
+    //     return response.status(404).send('cookie is not available anymore. Try again')
+    // }
+    // console.log(request.session)
+    // console.log(request.session.id)
+    request.session.visited = true
     response.status(200).send(products)
 })
 
@@ -68,13 +75,13 @@ routerProduct.delete('/user/delete/:id', (request, response) => {
     const parsedID = parseInt(id)
     if(isNaN(parsedID)) return response.status(404).send('Bad request***')
 
-    const indexUserDelete = people.findIndex(user => user.id === id)
+    const indexUserDelete = products.findIndex(user => user.id === id)
 
     if(indexUserDelete <0 ) return response.status(400).send('Bad request**')
 
-    people.splice(indexUserDelete, 1)
+    products.splice(indexUserDelete, 1)
 
-    response.status(200).send(people)
+    response.status(200).send(products)
 })
 
 module.exports = routerProduct
